@@ -40,7 +40,7 @@ size_t get_ticketsdir_path(char* result) {
 
 int create_tickets_dir() {
 	char ticketspath[BUFSIZE];
-	int len = get_ticketsdir_path(ticketspath);
+	get_ticketsdir_path(ticketspath);
 
 	int ret = mkdir(ticketspath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if (ret < 0) {
@@ -66,6 +66,11 @@ int get_next_ticketnum() {
 			char* stop;
 			currentticketnum = strtol(filename, &stop, 10);
 		}
+	}
+
+	int ret = closedir(ticketsdir);
+	if (ret == -1) {
+		err(EXIT_FAILURE, "Error in closing tickets directory %s");
 	}
 
 	return(currentticketnum + 1);
