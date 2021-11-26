@@ -8,6 +8,8 @@ make
 
 ## Options
 
-*./tkt -d*
+**./tkt -d**
 Create a new `tickets` directory in ~
 
+**./tkt -c**
+List the number of tickets (temporary)

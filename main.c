@@ -1,9 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "arg.h"
 #include "io.h"
-
 
 int main(int argc, const char** argv) {
 	char flags[30];
@@ -16,6 +16,10 @@ int main(int argc, const char** argv) {
 		if (flags[i] == 'd') {
 			int ret = create_tickets_dir();
 			return(ret);
+		} else if (flags[i] == 'c') {
+			int ret = get_next_ticketnum();
+			printf("%d\n", ret);
+			return(0);
 		}
 	}
 	return(0);
