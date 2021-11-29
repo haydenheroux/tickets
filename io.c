@@ -4,6 +4,7 @@
 
 #include <dirent.h>
 #include <err.h>
+#include <unistd.h>
 #include <sys/stat.h>
 
 const size_t BUFSIZE = 80;
@@ -59,12 +60,14 @@ int get_next_ticketnum() {
 	}
 
 	struct dirent *dirfile;
-	long currentticketnum = 0;
+	long highestticketnum = 0;
 	while ((dirfile = readdir(ticketsdir)) != NULL) {
 		if (dirfile->d_type == DT_REG) {
 			char* filename = dirfile->d_name;
 			char* stop;
-			currentticketnum = strtol(filename, &stop, 10);
+			long currentticketnum = strtol(filename, &stop, 10);
+			// TODO: Maximum macro
+			highestticketnum = currentticketnum > highestticketnum ? currentticketnum : highestticketnum;
 		}
 	}
 
@@ -73,5 +76,41 @@ int get_next_ticketnum() {
 		err(EXIT_FAILURE, "Error in closing tickets directory %s");
 	}
 
-	return(currentticketnum + 1);
+	return(highestticketnum + 1);
+}
+
+FILE* get_ticket_file(int num) {
+	char ticketspath[BUFSIZE];
+	get_ticketsdir_path(ticketspath);
+
+	char nextticketpath[BUFSIZE];
+	int chars = snprintf(nextticketpath, BUFSIZE, "%s/%d", ticketspath, num);
+	if (chars >= BUFSIZE) {
+		err(EXIT_FAILURE, "Error in getting next ticket path: Buffer size was too small.");
+	} else if (chars < 0) {
+		err(EXIT_FAILURE, "Error in getting next ticket path %s");
+	}
+
+	FILE* newticketfile = fopen(nextticketpath, "w");
+	if (newticketfile == NULL) {
+		err(EXIT_FAILURE, "Error in opening new ticket file %s");
+	}
+	return newticketfile;
+}
+
+int write_new_ticket() {
+	int num = get_next_ticketnum();
+
+	FILE* newticketfile = get_ticket_file(num);
+
+	char username[BUFSIZE];
+	int ret = getlogin_r(username, BUFSIZE);
+	if (ret != 0) {
+		err(EXIT_FAILURE, "Error in getting username %s");
+	}
+
+	fprintf(newticketfile, "ticket: %d\ncreator: %s\nstatus: open\n", num, username);
+
+	fclose(newticketfile);
+	return(0);
 }
