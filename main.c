@@ -13,46 +13,29 @@
 int main() {
 	int num = get_next_ticketnum();
 	char ticketspath[BUFSIZE];
-	char nextticketpath[BUFSIZE];
 	get_ticketsdir_path(ticketspath);
+
+	char nextticketpath[BUFSIZE];
 	int chars = snprintf(nextticketpath, BUFSIZE, "%s/%d", ticketspath, num);
 	if (chars >= BUFSIZE) {
 		err(EXIT_FAILURE, "Error in getting next ticket path: Buffer size was too small.");
 	} else if (chars < 0) {
 		err(EXIT_FAILURE, "Error in getting next ticket path %s");
 	}
+
 	FILE* newticketfile = fopen(nextticketpath, "w");
 	if (newticketfile == NULL) {
 		err(EXIT_FAILURE, "Error in opening new ticket file %s");
 	}
-	char ticketheader[BUFSIZE];
-	chars = snprintf(ticketheader, BUFSIZE, "ticket: %d\n", num);
-	if (chars >= BUFSIZE) {
-		err(EXIT_FAILURE, "Error in writing ticket header: Buffer size was too small.");
-	} else if (chars < 0) {
-		err(EXIT_FAILURE, "Error in writing ticket header %s");
-	}
-	size_t len = strlen(ticketheader);
-	fwrite(ticketheader, sizeof(char), len, newticketfile);
 
-	char creator[BUFSIZE];
 	char username[BUFSIZE];
 	int ret = getlogin_r(username, BUFSIZE);
 	if (ret != 0) {
 		err(EXIT_FAILURE, "Error in getting username %s");
 	}
-	chars = snprintf(creator, BUFSIZE, "creator: %s\n", username);
-	if (chars >= BUFSIZE) {
-		err(EXIT_FAILURE, "Error in writing creator line: Buffer size was too small.");
-	} else if (chars < 0) {
-		err(EXIT_FAILURE, "Error in writing creator line %s");
-	}
-	len = strlen(creator);
-	fwrite(creator, sizeof(char), len, newticketfile);
 
-	const char* status = "status: open\n";
-	len = strlen(status);
-	fwrite(status, sizeof(char), len, newticketfile);
+	fprintf(newticketfile, "ticket: %d\ncreator: %s\nstatus: open\n", num, username);
+
 	fclose(newticketfile);
 }
 
