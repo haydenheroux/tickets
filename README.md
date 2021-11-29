@@ -11,5 +11,5 @@ make
 **./tkt -d**
 Create a new `tickets` directory in ~
 
-**./tkt -c**
-List the number of tickets (temporary)
+**./tkt -n**
+Create a new ticket in the tickets directory `~/tickets`
